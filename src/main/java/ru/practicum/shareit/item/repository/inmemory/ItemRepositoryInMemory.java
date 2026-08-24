@@ -48,8 +48,8 @@ public class ItemRepositoryInMemory implements ItemRepository {
         String textSearch = text.toLowerCase();
 
         return items.values().stream().filter(item ->
-                ( item.getName().toLowerCase().contains(textSearch) ||
-                        item.getDescription().toLowerCase().contains(textSearch) ) &&
+                (item.getName().toLowerCase().contains(textSearch) ||
+                        item.getDescription().toLowerCase().contains(textSearch)) &&
                         item.getAvailable().equals(true)).toList();
     }
 
