@@ -9,12 +9,13 @@ import ru.practicum.shareit.check.ContentNotBlank;
 import ru.practicum.shareit.check.OnCreate;
 import ru.practicum.shareit.check.OnUpdate;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ItemDto {
+public class ItemDtoDates {
     private Long id;
 
     @NotBlank(groups = {OnCreate.class})
@@ -29,5 +30,7 @@ public class ItemDto {
     private Boolean available;
 
     private Long request;
+    private LocalDateTime lastBooking;
+    private LocalDateTime nextBooking;
     private List<CommentDtoOut> comments;
 }

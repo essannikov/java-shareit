@@ -2,6 +2,7 @@ package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
@@ -14,28 +15,31 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     @Override
     public List<UserDto> getAllUsers() {
-        return userRepository.getAllUsers().stream().map(UserMapper::toUserDto).toList();
+        return userRepository.findAll().stream().map(UserMapper::toUserDto).toList();
     }
 
     @Override
     public UserDto getUserById(Long userId) {
-        return userRepository.getUserById(getUser(userId).getId())
+        return userRepository.findById(getUser(userId).getId())
                 .map(UserMapper::toUserDto).orElse(null);
     }
 
+    @Transactional
     @Override
     public UserDto saveUser(UserDto userDto) {
         checkUserDto(userDto, false);
-        return userRepository.saveUser(UserMapper.toUser(userDto))
+        return Optional.of(userRepository.save(UserMapper.toUser(userDto)))
                 .map(UserMapper::toUserDto).orElse(null);
     }
 
+    @Transactional
     @Override
     public UserDto updateUser(UserDto userDto) {
         boolean changeFlag = false;
@@ -55,12 +59,15 @@ public class UserServiceImpl implements UserService {
             throw new ValidationException("Нет данных для изменения");
         }
 
-        return userRepository.updateUser(user).map(UserMapper::toUserDto).orElse(null);
+        return Optional.of(userRepository.save(user))
+                .map(UserMapper::toUserDto).orElse(null);
     }
 
+    @Transactional
     @Override
     public boolean deleteUserById(Long userId) {
-        return userRepository.deleteUserById(getUser(userId).getId());
+        userRepository.deleteById(getUser(userId).getId());
+        return true;
     }
 
     protected void checkUserDto(UserDto userDto, boolean updateFlag) {
@@ -92,7 +99,7 @@ public class UserServiceImpl implements UserService {
             throw new ValidationException("Не задан id пользователя");
         }
 
-        Optional<User> user = userRepository.getUserById(userId);
+        Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty()) {
             throw new NotFoundException(String.format("Пользователь с id = %d не найден", userId));
         }
@@ -101,9 +108,7 @@ public class UserServiceImpl implements UserService {
     }
 
     protected long getEmailCountExclUserId(String email, Long userId) {
-        String emailSearch = email.toLowerCase();
-        return userRepository.getAllUsers().stream()
-                .filter(u -> u.getEmail().toLowerCase().equals(emailSearch))
+        return userRepository.findAllByEmailIgnoreCase(email).stream()
                 .filter(u -> !u.getId().equals(userId))
                 .count();
     }
