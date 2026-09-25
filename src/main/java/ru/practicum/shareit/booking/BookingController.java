@@ -35,7 +35,7 @@ public class BookingController {
     public ResponseEntity<List<BookingDtoOut>> getAllBookingsByOwnerAndState(
             @RequestHeader(X_SHARER_USER_ID) Long userId,
             @RequestParam(defaultValue = "ALL") String state) {
-        log.info("Получен список всех бронирований вещей владельца с id = {}, state = {}." , userId, state);
+        log.info("Получен список всех бронирований вещей владельца с id = {}, state = {}.", userId, state);
         return ResponseEntity.ok(bookingService.getAllBookingsByOwnerAndState(userId, state));
     }
 
