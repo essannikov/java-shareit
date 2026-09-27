@@ -56,7 +56,7 @@ public class BookingServiceImpl implements BookingService {
                         Sort.by(Sort.Direction.DESC, "start"));
                 break;
             case FUTURE:
-                bookings = bookingRepository.findByBookerIdAndEndIsAfter(user.getId(), LocalDateTime.now(),
+                bookings = bookingRepository.findByBookerIdAndStartIsAfter(user.getId(), LocalDateTime.now(),
                         Sort.by(Sort.Direction.DESC, "start"));
                 break;
             case WAITING:
@@ -188,7 +188,7 @@ public class BookingServiceImpl implements BookingService {
         try {
             return BookingState.valueOf(state);
         } catch (IllegalArgumentException e) {
-            throw new NotFoundException(String.format("Статус = %s не найден", state));
+            throw new ValidationException(String.format("Статус = %s не найден", state));
         }
     }
 
